@@ -13,15 +13,22 @@ import android.view.ViewGroup;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
 
 /**
  * A simple {@link Fragment} subclass.
  */
-public class MapaFragment extends SupportMapFragment implements
-        OnMapReadyCallback {
+public class MapaFragment extends SupportMapFragment implements OnMapReadyCallback {
     private GoogleMap miMapa;
+    private int tipoMapa;
+    private LatLng coordenadas;
+    private OnMapaListener listener;
 
     public MapaFragment() {
+    }
+
+    public void setListener(OnMapaListener listener) {
+        this.listener = listener;
     }
 
     @Override
@@ -29,11 +36,12 @@ public class MapaFragment extends SupportMapFragment implements
             container, Bundle savedInstanceState) {
         View rootView = super.onCreateView(inflater, container,
                 savedInstanceState);
-        int tipoMapa = 0;
+        tipoMapa = 0;
         Bundle argumentos = getArguments();
         if (argumentos != null) {
             tipoMapa = argumentos.getInt("tipo_mapa", 0);
         }
+
         getMapAsync(this);
         return rootView;
     }
@@ -49,6 +57,19 @@ public class MapaFragment extends SupportMapFragment implements
                 return;
         }
         miMapa.setMyLocationEnabled(true);
+
+        if(tipoMapa == 1){
+            miMapa.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
+                @Override
+                public void onMapLongClick(LatLng latLng) {
+                    listener.coordenadasSeleccionadas(latLng);
+                }
+            });
         }
     }
+
+    public interface OnMapaListener {
+        public void coordenadasSeleccionadas(LatLng c);
+    }
+}
 
