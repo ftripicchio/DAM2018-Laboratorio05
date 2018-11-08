@@ -68,6 +68,9 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
                                     fragment = new MapaFragment();
                                     ((MapaFragment) fragment).setListener(MainActivity.this);
                                 }
+                                Bundle bundle = new Bundle();
+                                bundle.putInt("tipo_mapa", 2);
+                                fragment.setArguments(bundle);
                                 fragmentTransaction = true;
                                 break;
                             case R.id.optHeatMap:
