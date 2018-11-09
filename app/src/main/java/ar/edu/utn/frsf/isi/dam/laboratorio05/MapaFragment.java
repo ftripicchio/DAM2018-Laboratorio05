@@ -24,6 +24,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.TileOverlayOptions;
+import com.google.maps.android.heatmaps.HeatmapTileProvider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -92,6 +94,8 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
             cargarReclamosAsyn();
         } else if (tipoMapa == 3) {
             cargarReclamoAsyn(idReclamo);
+        } else if (tipoMapa == 4) {
+            hacerHeat();
         }
     }
 
@@ -149,6 +153,37 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
                         Circle circle = miMapa.addCircle(circleOptions);
 
                         miMapa.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 14));
+                    }
+                });
+            }
+        };
+        Thread t1 = new Thread(hiloCargarReclamos);
+        t1.start();
+    }
+
+    private void hacerHeat(){
+        reclamoDao = MyDatabase.getInstance(this.getActivity()).getReclamoDao();
+        listaReclamos = new ArrayList<>();
+        Runnable hiloCargarReclamos = new Runnable() {
+            @Override
+            public void run() {
+                listaReclamos.addAll(reclamoDao.getAll());
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        ArrayList<LatLng> list = new ArrayList<>();
+                        LatLngBounds.Builder builder = new LatLngBounds.Builder();
+                        for(Reclamo r : listaReclamos){
+                            list.add(new LatLng(r.getLatitud(), r.getLongitud()));
+                            builder.include(new LatLng(r.getLatitud(), r.getLongitud()));
+                        }
+                        LatLngBounds bounds = builder.build();
+                        CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds,10);
+                        miMapa.moveCamera(cu);
+                        
+                        HeatmapTileProvider provider = new HeatmapTileProvider.Builder().data(list).build();
+                        miMapa.addTileOverlay(new TileOverlayOptions().tileProvider(provider));
+
                     }
                 });
             }
