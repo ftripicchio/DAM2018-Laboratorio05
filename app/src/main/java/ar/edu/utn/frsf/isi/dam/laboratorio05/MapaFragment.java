@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.os.Message;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +25,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.TileOverlayOptions;
 import com.google.maps.android.heatmaps.HeatmapTileProvider;
 
@@ -41,6 +44,7 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
     private GoogleMap miMapa;
     private int tipoMapa;
     private int idReclamo;
+    private String tipoReclamo;
     private LatLng coordenadas;
     private OnMapaListener listener;
 
@@ -65,6 +69,7 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
         if (argumentos != null) {
             tipoMapa = argumentos.getInt("tipo_mapa", 0);
             if (tipoMapa == 3) idReclamo = argumentos.getInt("idReclamo");
+            if (tipoMapa == 5) tipoReclamo = argumentos.getString("tipo_reclamo");
         }
 
         getMapAsync(this);
@@ -96,6 +101,8 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
             cargarReclamoAsyn(idReclamo);
         } else if (tipoMapa == 4) {
             hacerHeat();
+        } else if (tipoMapa == 5) {
+            unirConLineas(tipoReclamo);
         }
     }
 
@@ -180,10 +187,53 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
                         LatLngBounds bounds = builder.build();
                         CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds,10);
                         miMapa.moveCamera(cu);
-                        
+
                         HeatmapTileProvider provider = new HeatmapTileProvider.Builder().data(list).build();
                         miMapa.addTileOverlay(new TileOverlayOptions().tileProvider(provider));
 
+                    }
+                });
+            }
+        };
+        Thread t1 = new Thread(hiloCargarReclamos);
+        t1.start();
+    }
+
+    private void unirConLineas(final String tipoReclamo) {
+        reclamoDao = MyDatabase.getInstance(this.getActivity()).getReclamoDao();
+        listaReclamos = new ArrayList<>();
+        Runnable hiloCargarReclamos = new Runnable() {
+            @Override
+            public void run() {
+                listaReclamos.addAll(reclamoDao.getByTipo(tipoReclamo));
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        LatLngBounds.Builder builder = new LatLngBounds.Builder();
+                        for(int i=0;i<listaReclamos.size()-1;i++) {
+                            Reclamo curr = listaReclamos.get(i);
+                            Reclamo next = listaReclamos.get(i+1);
+                            miMapa.addMarker(new MarkerOptions()
+                                    .position(new LatLng(curr.getLatitud(), curr.getLongitud()))
+                                    .title(curr.getId() + "-" + curr.getTipo().toString())
+                                    .snippet(curr.getReclamo()));
+                            miMapa.addPolyline(new PolylineOptions()
+                                    .add(new LatLng(curr.getLatitud(), curr.getLongitud()),
+                                         new LatLng(next.getLatitud(), next.getLongitud()))
+                                    .width(5)
+                                    .color(Color.RED));
+                            builder.include(new LatLng(curr.getLatitud(), curr.getLongitud()));
+                            if(i+1 == listaReclamos.size()-1){
+                                miMapa.addMarker(new MarkerOptions()
+                                        .position(new LatLng(next.getLatitud(), next.getLongitud()))
+                                        .title(next.getId() + "-" + next.getTipo().toString())
+                                        .snippet(next.getReclamo()));
+                                builder.include(new LatLng(next.getLatitud(), next.getLongitud()));
+                            }
+                        }
+                        LatLngBounds bounds = builder.build();
+                        CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds,10);
+                        miMapa.moveCamera(cu);
                     }
                 });
             }

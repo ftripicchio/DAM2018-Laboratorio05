@@ -84,6 +84,14 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
                                 fragment.setArguments(arg);
                                 fragmentTransaction = true;
                                 break;
+                            case R.id.optFormulario:
+                                tag="formularioBusqueda";
+                                fragment =  getSupportFragmentManager().findFragmentByTag(tag);
+                                if(fragment==null) {
+                                    fragment = new FormularioBusquedaFragment();
+                                }
+                                fragmentTransaction = true;
+                                break;
                         }
 
                         if(fragmentTransaction) {
