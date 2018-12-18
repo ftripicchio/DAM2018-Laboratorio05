@@ -151,9 +151,7 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
         bundle.putString("latLng",c.latitude+";"+c.longitude);
         fragment.setArguments(bundle);
         getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.contenido, fragment,tag)
-                .commit();
+                .popBackStack();
 
     }
 

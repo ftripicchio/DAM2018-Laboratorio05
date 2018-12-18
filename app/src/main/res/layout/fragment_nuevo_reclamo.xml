@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     tools:context=".NuevoReclamoFragment">
     <TextView
         android:text="Coordenadas"
@@ -48,6 +48,21 @@
         android:id="@+id/reclamo_tipo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"></Spinner>
+    <Button
+        android:id="@+id/btnFoto"
+        android:text="Agregar Foto"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    <ImageView android:id="@+id/foto"
+        android:layout_width="100dp"
+        android:layout_height="130dp"
+        android:adjustViewBounds="true"
+        android:scaleType="centerCrop"/>
+    <Button
+        android:id="@+id/btnAudio"
+        android:text="Grabar Audio"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
     <Button
         android:id="@+id/btnGuardar"
         android:text="Guardar"
