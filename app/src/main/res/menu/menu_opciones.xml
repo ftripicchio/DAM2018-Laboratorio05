@@ -4,4 +4,5 @@
     <item android:id="@+id/optNuevoReclamo" android:title="Nuevo Reclamo"></item>
     <item android:id="@+id/optVerMapa" android:title="Ver en Mapa"></item>
     <item android:id="@+id/optHeatMap" android:title="HeatMap"></item>
+    <item android:id="@+id/optFormulario" android:title="Formulario de Búsqueda"></item>
 </menu>

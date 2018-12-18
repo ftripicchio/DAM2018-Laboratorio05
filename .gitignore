@@ -9,3 +9,4 @@
 /build
 /captures
 .externalNativeBuild
+**/clave_mapas.xml
